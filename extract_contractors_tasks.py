@@ -55,7 +55,8 @@ def split_excel_by_unique_names(input_file, output_folder, filter_date):
     
     # Iterate over each unique name and create a new Excel file
     for name in unique_names:
-        with pd.ExcelWriter(os.path.join(output_folder, f'{name}.xlsx')) as writer:
+        file_name = f'{name}_{filter_date}.xlsx'
+        with pd.ExcelWriter(os.path.join(output_folder, file_name)) as writer:
             # Create the "mail copy/paste" sheet
             mail_copy_df = df_aggregated[(df_aggregated['Όνομα'] == name) & (pd.to_datetime(df_aggregated['Ημ/νία Αίτησης']).dt.date == filter_date)][mail_copy_columns]
             mail_copy_df.to_excel(writer, sheet_name='mail copy&paste', index=False)
@@ -84,7 +85,7 @@ def split_excel_by_unique_names(input_file, output_folder, filter_date):
                 
                 # Write the filtered DataFrame to the new Excel file
                 filtered_df.to_excel(writer, sheet_name=sheet_name, index=False)
-            print(f"Created {os.path.join(output_folder, f'{name}.xlsx')}")
+            print(f"Created {os.path.join(output_folder, file_name)}")
 
 if __name__ == "__main__":
     # Prompt the user to select the input file
