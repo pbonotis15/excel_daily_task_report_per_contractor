@@ -23,7 +23,7 @@ This is a Python-based tool designed to automate the segmentation of a master Ex
 
 1. Clone this repository or download the script files.
     ```sh
-    git clone https://github.com/pbonotis15/excel-data-merger-and-summary-based-on-IDs.git
+    git clone https://github.com/pbonotis15/excel_daily_task_report_per_contractor.git
     cd your-repo-name
     ```
 
