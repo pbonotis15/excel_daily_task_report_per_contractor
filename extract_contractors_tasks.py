@@ -13,24 +13,19 @@
 import pandas as pd
 import os
 import tkinter as tk
-from tkinter import filedialog, simpledialog
+from tkinter import filedialog, simpledialog, messagebox
+from tkinter import ttk
 from datetime import datetime
 
 def get_file_path():
-    root = tk.Tk()
-    root.withdraw()  # Hide the main window
     file_path = filedialog.askopenfilename(title="Select Excel File", filetypes=[("Excel files", "*.xlsx;*.xls")])
     return file_path
 
 def get_output_folder():
-    root = tk.Tk()
-    root.withdraw()  # Hide the main window
     folder_path = filedialog.askdirectory(title="Select Output Folder")
     return folder_path
 
 def get_date():
-    root = tk.Tk()
-    root.withdraw()  # Hide the main window
     today_str = datetime.today().strftime('%Y-%m-%d')
     date_str = simpledialog.askstring("Input Date", f"Enter the date (YYYY-MM-DD) to filter by 'Ημ/νία Αίτησης':", initialvalue=today_str)
     return date_str
@@ -87,37 +82,51 @@ def split_excel_by_unique_names(input_file, output_folder, filter_date):
                 filtered_df.to_excel(writer, sheet_name=sheet_name, index=False)
             print(f"Created {os.path.join(output_folder, file_name)}")
 
-if __name__ == "__main__":
-    # Prompt the user to select the input file
-    input_file = get_file_path()
+def run_splitter():
+    input_file = file_path.get()
+    output_folder = output_folder_path.get()
+    filter_date = date_entry.get()
     
-    if not input_file:
-        print("No file selected.")
-        exit()
-
-    # Prompt the user to select the output folder
-    output_folder = get_output_folder()
+    if not input_file or not output_folder or not filter_date:
+        messagebox.showerror("Error", "Please select the input file, output folder, and enter the date.")
+        return
     
-    if not output_folder:
-        print("No output folder selected.")
-        exit()
-    
-    # Prompt the user to enter the date for filtering, prefilled with today's date
-    filter_date = get_date()
-    
-    if not filter_date:
-        print("No date entered.")
-        exit()
-
     try:
         # Ensure the date is in the correct format
         filter_date = pd.to_datetime(filter_date).date()
     except ValueError:
-        print("Invalid date format. Please enter the date in YYYY-MM-DD format.")
-        exit()
+        messagebox.showerror("Error", "Invalid date format. Please enter the date in YYYY-MM-DD format.")
+        return
     
-    # Ensure the output folder exists
-    os.makedirs(output_folder, exist_ok=True)
-    
-    # Split the Excel file by unique names and filter by date
-    split_excel_by_unique_names(input_file, output_folder, filter_date)
+    try:
+        # Split the Excel file by unique names and filter by date
+        split_excel_by_unique_names(input_file, output_folder, filter_date)
+        messagebox.showinfo("Success", "Files created successfully.")
+    except Exception as e:
+        messagebox.showerror("Error", f"An error occurred: {e}")
+
+# Create the main application window
+root = tk.Tk()
+root.title("Excel Splitter")
+
+# Create and set variables
+file_path = tk.StringVar()
+output_folder_path = tk.StringVar()
+date_entry = tk.StringVar()
+
+# Create and place widgets
+tk.Label(root, text="Select Excel File:").grid(row=0, column=0, padx=10, pady=5, sticky='e')
+tk.Entry(root, textvariable=file_path, width=50).grid(row=0, column=1, padx=10, pady=5)
+tk.Button(root, text="Browse", command=lambda: file_path.set(get_file_path())).grid(row=0, column=2, padx=10, pady=5)
+
+tk.Label(root, text="Select Output Folder:").grid(row=1, column=0, padx=10, pady=5, sticky='e')
+tk.Entry(root, textvariable=output_folder_path, width=50).grid(row=1, column=1, padx=10, pady=5)
+tk.Button(root, text="Browse", command=lambda: output_folder_path.set(get_output_folder())).grid(row=1, column=2, padx=10, pady=5)
+
+tk.Label(root, text="Enter Date (YYYY-MM-DD):").grid(row=2, column=0, padx=10, pady=5, sticky='e')
+tk.Entry(root, textvariable=date_entry, width=50).grid(row=2, column=1, padx=10, pady=5)
+
+tk.Button(root, text="Run", command=run_splitter).grid(row=3, column=1, padx=10, pady=20)
+
+# Start the application
+root.mainloop()
